@@ -13,4 +13,5 @@ cd ../../
 python3 server.py > server.log 2>&1 &
 cd ckb-light-client-rpc
 npm i
+npm run build
 npm run service

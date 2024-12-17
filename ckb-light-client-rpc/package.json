@@ -25,6 +25,7 @@
     "typescript": "^5.7.2"
   },
   "scripts": {
+    "build": "npx playwright install",
     "service": "ts-node src/server.ts"
   },
   "devDependencies": {
