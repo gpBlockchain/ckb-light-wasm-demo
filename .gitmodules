@@ -1,0 +1,5 @@
+[submodule "ckb-light-client"]
+	path = ckb-light-client
+	url = https://github.com/Officeyutong/ckb-light-client.git
+	branch = wasm-support-with-sync-indexeddb
+

@@ -1,0 +1,292 @@
+<html>
+
+<head>
+    <script src="jquery.min.js"></script>
+    <link rel="stylesheet" href="semantic.min.css">
+    <script src="semantic.min.js"></script>
+    <script type="module">
+        import LightClient from "./ckb-light-client/light-client-js/dist/index.js";
+
+        const testNetConfig = await (await fetch("./dev-config.toml")).text();
+        const devNetConfig = await (await fetch("./config.toml")).text();
+        const devNetSpec = await (await fetch("./dev.toml")).text();
+
+        // @ts-ignore
+        BigInt.prototype.toJSON = function () {
+            return `${this.toString()}n`
+        }
+        console.log(LightClient);
+        window.initWorkers = async () => {
+            $("#init-button").addClass("loading");
+            const client = new LightClient();
+            window.client = client;
+            await client.start(
+                {
+                    type: "TestNet",
+                    config: testNetConfig,
+                },
+                "info"
+            );
+
+            $("#init-button").removeClass("loading");
+        };
+
+        window.initWorkers2 = async () => {
+            $("#init-button2").addClass("loading");
+            const client = new LightClient();
+            window.client = client;
+            await client.start(
+                {
+                    type: "DevNet",
+                    spec: devNetSpec,
+                    config: devNetConfig,
+
+                },
+                "info"
+            );
+
+            $("#init-button2").removeClass("loading");
+        };
+
+        window.showScripts = async () => {
+            const scripts = await window.client.getScripts();
+            const table = document.createElement("table");
+            table.classList.add("ui", "celled", "table");
+
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            const headers = ["Script", "Type", "blockNumber"];
+            headers.forEach(headerText => {
+                const th = document.createElement("th");
+                th.appendChild(document.createTextNode(headerText));
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+            scripts.forEach(script => {
+                const row = document.createElement("tr");
+                const cellScript = document.createElement("td");
+                cellScript.appendChild(document.createTextNode(script.script.args));
+                row.appendChild(cellScript);
+
+                const cellType = document.createElement("td");
+                cellType.appendChild(document.createTextNode(script.scriptType));
+                row.appendChild(cellType);
+
+                const cellArgs = document.createElement("td");
+                cellArgs.appendChild(document.createTextNode(script.blockNumber));
+                row.appendChild(cellArgs);
+
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+            resultDiv.appendChild(table);
+        };
+
+        window.showGetCellsForm = async () => {
+            const form = document.createElement("form");
+            form.classList.add("ui", "form");
+
+            const scriptInput = document.createElement("input");
+            scriptInput.setAttribute("type", "text");
+            scriptInput.setAttribute("placeholder", "lock-args");
+            scriptInput.setAttribute("id", "lock-args");
+            form.appendChild(scriptInput);
+
+            const submitButton = document.createElement("button");
+            submitButton.classList.add("ui", "button");
+            submitButton.setAttribute("type", "button");
+            submitButton.appendChild(document.createTextNode("Submit"));
+            submitButton.onclick = async () => {
+                const lock_args = document.getElementById("lock-args").value;
+                let response = await window.client.getCells({
+                    script: {
+                        codeHash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        hashType: "type",
+                        args: lock_args
+                    }, scriptType: 'lock'
+                });
+                console.log(response)
+                const table = document.createElement("table");
+                table.classList.add("ui", "celled", "table");
+
+                const thead = document.createElement("thead");
+                const headerRow = document.createElement("tr");
+                const headers = ["Capacity", "Lock", "Type", "Out Point"];
+                headers.forEach(headerText => {
+                    const th = document.createElement("th");
+                    th.appendChild(document.createTextNode(headerText));
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                const tbody = document.createElement("tbody");
+                response.cells.forEach(cell => {
+                    const row = document.createElement("tr");
+
+                    const cellCapacity = document.createElement("td");
+                    cellCapacity.appendChild(document.createTextNode(cell.cellOutput.capacity));
+                    row.appendChild(cellCapacity);
+
+                    const cellLock = document.createElement("td");
+                    cellLock.appendChild(document.createTextNode(JSON.stringify(cell.cellOutput.lock)));
+                    row.appendChild(cellLock);
+
+                    const cellType = document.createElement("td");
+                    cellType.appendChild(document.createTextNode(cell.cellOutput.type ? JSON.stringify(cell.cellOutput.type) : "null"));
+                    row.appendChild(cellType);
+
+                    const cellOutPoint = document.createElement("td");
+                    cellOutPoint.appendChild(document.createTextNode(JSON.stringify(cell.outPoint)));
+                    row.appendChild(cellOutPoint);
+
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+
+                const resultDiv = document.getElementById("result");
+                resultDiv.innerHTML = "";
+                resultDiv.appendChild(table);
+            };
+            form.appendChild(submitButton);
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+            resultDiv.appendChild(form);
+
+        };
+
+        window.showGetTxsForm = async () => {
+            const form = document.createElement("form");
+            form.classList.add("ui", "form");
+
+            const scriptInput = document.createElement("input");
+            scriptInput.setAttribute("type", "text");
+            scriptInput.setAttribute("placeholder", "lock-args");
+            scriptInput.setAttribute("id", "lock-args");
+            form.appendChild(scriptInput);
+
+            const submitButton = document.createElement("button");
+            submitButton.classList.add("ui", "button");
+            submitButton.setAttribute("type", "button");
+            submitButton.appendChild(document.createTextNode("Submit"));
+
+            submitButton.onclick = async () => {
+                const lock_args = document.getElementById("lock-args").value;
+                let response = await window.client.getTransactions({
+                    script: {
+                        codeHash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        hashType: "type",
+                        args: lock_args
+                    }, scriptType: 'lock'
+                });
+                console.log(response)
+                const table = document.createElement("table");
+                table.classList.add("ui", "celled", "table");
+
+                const thead = document.createElement("thead");
+                const headerRow = document.createElement("tr");
+                const headers = ["Transaction Hash", "Block Number", "Transaction Index"];
+                headers.forEach(headerText => {
+                    const th = document.createElement("th");
+                    th.appendChild(document.createTextNode(headerText));
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                const tbody = document.createElement("tbody");
+                response.transactions.forEach(tx => {
+                    const row = document.createElement("tr");
+
+                    const cellTxHash = document.createElement("td");
+                    cellTxHash.appendChild(document.createTextNode(tx.transaction.hash()));
+                    row.appendChild(cellTxHash);
+
+                    const cellBlockNumber = document.createElement("td");
+                    cellBlockNumber.appendChild(document.createTextNode(tx.blockNumber));
+                    row.appendChild(cellBlockNumber);
+
+                    const cellTxIndex = document.createElement("td");
+                    cellTxIndex.appendChild(document.createTextNode(tx.txIndex));
+                    row.appendChild(cellTxIndex);
+
+                    tbody.appendChild(row);
+
+                });
+                table.appendChild(tbody);
+                const resultDiv = document.getElementById("result");
+                resultDiv.innerHTML = "";
+                resultDiv.appendChild(table);
+            };
+            form.appendChild(submitButton);
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+            resultDiv.appendChild(form);
+
+        }
+
+        window.showSetScriptsForm = async () => {
+            const form = document.createElement("form");
+            form.classList.add("ui", "form");
+
+            const scriptInput = document.createElement("input");
+            scriptInput.setAttribute("type", "text");
+            scriptInput.setAttribute("placeholder", "lock-args");
+            scriptInput.setAttribute("id", "lock-args");
+            form.appendChild(scriptInput);
+
+
+            const blockNumberInput = document.createElement("input");
+            blockNumberInput.setAttribute("type", "text");
+            blockNumberInput.setAttribute("placeholder", "1");
+            blockNumberInput.setAttribute("id", "blockNumber");
+            form.appendChild(blockNumberInput);
+
+            const submitButton = document.createElement("button");
+            submitButton.classList.add("ui", "button");
+            submitButton.setAttribute("type", "button");
+            submitButton.appendChild(document.createTextNode("Submit"));
+            submitButton.onclick = async () => {
+                const lock_args = document.getElementById("lock-args").value;
+                const blockNumber = document.getElementById("blockNumber").value;
+                await window.client.setScripts([{
+                    script: {
+                        codeHash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+                        hashType: "type",
+                        args: lock_args
+                    }, scriptType: 'lock', blockNumber: blockNumber
+                }], 1);
+            };
+            form.appendChild(submitButton);
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+            resultDiv.appendChild(form);
+        }
+    </script>
+
+</head>
+
+<body>
+<div style="margin-top: 10%;margin-left: 10%;margin-right: 10%;">
+    <button class="ui button" id="init-button" onclick="initWorkers()">Initialize workers</button>
+    <button class="ui button" id="set-scripts-button" onclick="showSetScriptsForm()">Set Scripts</button>
+    <button class="ui button" id="show-scripts-button" onclick="showScripts()">Show Scripts</button>
+    <button class="ui button" id="show-get-cells-button" onclick="showGetCellsForm()">show GetCells Form</button>
+    <button class="ui button" id="show-get-txs-button" onclick="showGetTxsForm()">show GetTxs Form</button>
+    <div id="result" style="max-height: 100vh; overflow-y: auto;"></div>
+
+    <div class="ui divider"></div>
+
+</div>
+</body>
+
+</html>
