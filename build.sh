@@ -10,4 +10,7 @@ cd ../light-client-js
 npm i
 npm run build
 cd ../../
-python server.py
+python3 server.py > server.log 2>&1 &
+cd ckb-light-client-rpc
+npm i
+npm run service

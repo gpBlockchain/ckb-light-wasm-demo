@@ -31,7 +31,7 @@
             $("#init-button").removeClass("loading");
         };
 
-        window.initWorkers2 = async () => {
+        window.initWorkersDev = async () => {
             $("#init-button2").addClass("loading");
             const client = new LightClient();
             window.client = client;
@@ -278,6 +278,7 @@
 <body>
 <div style="margin-top: 10%;margin-left: 10%;margin-right: 10%;">
     <button class="ui button" id="init-button" onclick="initWorkers()">Initialize workers</button>
+    <button class="ui button" id="init-button2" onclick="initWorkersDev()">Initialize dev workers</button>
     <button class="ui button" id="set-scripts-button" onclick="showSetScriptsForm()">Set Scripts</button>
     <button class="ui button" id="show-scripts-button" onclick="showScripts()">Show Scripts</button>
     <button class="ui button" id="show-get-cells-button" onclick="showGetCellsForm()">show GetCells Form</button>
