@@ -40,6 +40,8 @@ BigInt.prototype.toJSON = function () {
 
 
 const server = new JSONRPCServer();
+app.use(express.json({limit: '50000mb'}));
+app.use(express.urlencoded({limit: '50000mb'}));
 
 
 // set_scripts
