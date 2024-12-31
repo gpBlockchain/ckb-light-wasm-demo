@@ -4,27 +4,22 @@
     <script src="jquery.min.js"></script>
     <link rel="stylesheet" href="semantic.min.css">
     <script src="semantic.min.js"></script>
-    <script type="module">
-        import LightClient from "./ckb-light-client/light-client-js/dist/index.js";
-
-        const testNetConfig = await (await fetch("./dev-config.toml")).text();
-        const devNetConfig = await (await fetch("./config.toml")).text();
-        const devNetSpec = await (await fetch("./dev.toml")).text();
-
+    <script src="./ckb-light-client/light-client-js/dist/index.js"></script>
+    <script>
         // @ts-ignore
         BigInt.prototype.toJSON = function () {
             return `${this.toString()}n`
         }
-        console.log(LightClient);
         window.initWorkers = async () => {
+            const testNetConfig = await (await fetch("./dev-config.toml")).text();
             $("#init-button").addClass("loading");
-            const client = new LightClient();
+            const client = new CkbLightClient.LightClient();
             window.client = client;
             await client.start(
                 {
                     type: "TestNet",
                     config: testNetConfig,
-                },
+                },"0xc1993c60556fe01da6a9c11651638c885d04e7c093f74697bb0233fae0bc2577",
                 "info"
             );
 
@@ -33,7 +28,11 @@
 
         window.initWorkersDev = async () => {
             $("#init-button2").addClass("loading");
-            const client = new LightClient();
+
+            const devNetConfig = await (await fetch("./config.toml")).text();
+            const devNetSpec = await (await fetch("./dev.toml")).text();
+
+            const client = new CkbLightClient.LightClient();
             window.client = client;
             await client.start(
                 {
@@ -41,7 +40,7 @@
                     spec: devNetSpec,
                     config: devNetConfig,
 
-                },
+                },"0xc1993c60556fe01da6a9c11651638c885d04e7c093f74697bb0233fae0bc2577",
                 "info"
             );
 
