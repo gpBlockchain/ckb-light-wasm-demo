@@ -4,9 +4,10 @@
     <script src="jquery.min.js"></script>
     <link rel="stylesheet" href="semantic.min.css">
     <script src="semantic.min.js"></script>
-    <script src="./ckb-light-client/light-client-js/dist/index.js"></script>
-    <script>
+<!--    <script src="./ckb-light-client/light-client-js/dist/index.js"></script>-->
+    <script type="module">
         // @ts-ignore
+        import * as CkbLightClient from "./ckb-light-client/wasm/light-client-js/dist/index.js";
         BigInt.prototype.toJSON = function () {
             return `${this.toString()}n`
         }
