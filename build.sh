@@ -1,6 +1,7 @@
 # git clone light
 cd ckb-light-client
-npm i
+cargo install wasm-pack
+npm install
 npm run build -ws
 cd ../
 python3 server.py > server.log 2>&1 &
