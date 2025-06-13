@@ -1,5 +1,5 @@
 [submodule "ckb-light-client"]
 	path = ckb-light-client
 	url = https://github.com/nervosnetwork/ckb-light-client.git
-	branch = update-ckb-version
+	branch = develop
 
