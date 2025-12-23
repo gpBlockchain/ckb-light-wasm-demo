@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ckb-ccc/core": "0.1.0-alpha.6",
+    "@nervosnetwork/ckb-light-client-js": "file:../../ckb-light-client/wasm/light-client-js",
     "@typescript-eslint/eslint-plugin": "6.16.0",
     "@typescript-eslint/parser": "6.16.0",
     "body-parser": "^1.20.3",
@@ -26,7 +27,8 @@
   },
   "scripts": {
     "build": "npx playwright install",
-    "service": "ts-node src/server.ts"
+    "service": "ts-node src/server.ts",
+    "service-node": "ts-node src/server_node.ts"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
