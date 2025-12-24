@@ -26,7 +26,7 @@ import path from "path";
 const app = express();
 const port = 9000;
 let client: LightClient;
-
+let isDev = false;
 // @ts-ignore
 BigInt.prototype.toJSON = function () {
     return `0x${this.toString(16)}`
@@ -97,7 +97,7 @@ server.addMethod("get_transaction", async ([tx_hash]: [string]) => {
 // fetch_header
 server.addMethod("fetch_header", async ([header_hash]: [string]) => {
     // @ts-ignore
-    let input = client.fetchHeader(header_hash);
+    let input = await client.fetchHeader(header_hash);
     if (input.status === "fetched") {
         return {status: "fetched", data: JsonRpcTransformers.blockHeaderFrom(input.data)};
     }
@@ -106,7 +106,7 @@ server.addMethod("fetch_header", async ([header_hash]: [string]) => {
 // fetch_transaction
 server.addMethod("fetch_transaction", async ([tx_hash]: [string]) => {
     // @ts-ignore
-    let input = client.fetchTransaction(tx_hash);
+    let input = await client.fetchTransaction(tx_hash);
     if (input.status === "fetched") {
         return {status: "fetched", data: JsonRpcTransformers.transactionResponseFrom(input.data)};
     }
@@ -184,25 +184,40 @@ server.addMethod("stop", async () => {
 
 
 server.addMethod("start", async () => {
+    // todo stop 后调用start 会卡住,所以先将start 替换成 new_client 
+    if (isDev){
+        // new_dev_client
+        client = new LightClient();
+        const config = await fs.readFile(path.resolve(__dirname, '../../dev.toml'));
+        const spec = await fs.readFile(path.resolve(__dirname, '../../dev.toml'));
+        await client.start({ type: "DevNet", spec,config }, randomSecretKey(), "info", "ws");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        return ;
+    }
+    client = new LightClient();
     const config = await fs.readFile(path.resolve(__dirname, '../../dev-config.toml'));
     await client.start({ type: "TestNet", config }, randomSecretKey(), "info", "ws");
 });
 
 
 server.addMethod("new_client", async () => {
+    await client.stop();
     client = new LightClient();
     const config = await fs.readFile(path.resolve(__dirname, '../../dev-config.toml'));
     await client.start({ type: "TestNet", config }, randomSecretKey(), "info", "ws");
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    isDev = false;
 });
 
 server.addMethod("new_dev_client", async () => {
     // todo support dev 
+    await client.stop();
     client = new LightClient();
     const config = await fs.readFile(path.resolve(__dirname, '../../dev.toml'));
     const spec = await fs.readFile(path.resolve(__dirname, '../../dev.toml'));
     await client.start({ type: "DevNet", spec,config }, randomSecretKey(), "info", "ws");
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    isDev = true;
 });
 
 
