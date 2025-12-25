@@ -188,7 +188,7 @@ server.addMethod("start", async () => {
     if (isDev){
         // new_dev_client
         client = new LightClient();
-        const config = await fs.readFile(path.resolve(__dirname, '../../dev.toml'));
+        const config = await fs.readFile(path.resolve(__dirname, '../../config.toml'));
         const spec = await fs.readFile(path.resolve(__dirname, '../../dev.toml'));
         await client.start({ type: "DevNet", spec,config }, randomSecretKey(), "info", "ws");
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -213,9 +213,9 @@ server.addMethod("new_dev_client", async () => {
     // todo support dev 
     await client.stop();
     client = new LightClient();
-    const config = await fs.readFile(path.resolve(__dirname, '../../dev.toml'));
+    const config = await fs.readFile(path.resolve(__dirname, '../../config.toml'));
     const spec = await fs.readFile(path.resolve(__dirname, '../../dev.toml'));
-    await client.start({ type: "DevNet", spec,config }, randomSecretKey(), "info", "ws");
+    await client.start({ type: "DevNet",  spec: spec,config:config }, randomSecretKey(), "info", "ws");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     isDev = true;
 });
