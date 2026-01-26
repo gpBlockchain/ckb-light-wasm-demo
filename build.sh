@@ -9,7 +9,14 @@ cd ckb-light-client
 git remote set-url origin ${CKB_LIGHT_CLIENT_URL}
 # 强制切换到指定分支
 git fetch origin
-git checkout -B ${CKB_LIGHT_CLIENT_BRANCH} origin/${CKB_LIGHT_CLIENT_BRANCH} 2>/dev/null || git checkout ${CKB_LIGHT_CLIENT_BRANCH}
+if git ls-remote --heads origin ${CKB_LIGHT_CLIENT_BRANCH} | grep -q ${CKB_LIGHT_CLIENT_BRANCH}; then
+    git checkout -B ${CKB_LIGHT_CLIENT_BRANCH} origin/${CKB_LIGHT_CLIENT_BRANCH}
+elif git show-ref --verify --quiet refs/heads/${CKB_LIGHT_CLIENT_BRANCH}; then
+    git checkout ${CKB_LIGHT_CLIENT_BRANCH}
+else
+    echo "Error: Branch ${CKB_LIGHT_CLIENT_BRANCH} does not exist in remote or local"
+    exit 1
+fi
 cargo install wasm-pack
 npm install
 npm run build -ws
