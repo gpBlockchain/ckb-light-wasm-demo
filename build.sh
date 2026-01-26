@@ -8,13 +8,21 @@ cd ckb-light-client
 # 强制更新 remote URL
 git remote set-url origin ${CKB_LIGHT_CLIENT_URL}
 # 强制切换到指定分支
-git fetch origin
-if git ls-remote --heads origin ${CKB_LIGHT_CLIENT_BRANCH} | grep -q ${CKB_LIGHT_CLIENT_BRANCH}; then
+git fetch origin --prune
+# 检查远程分支是否存在
+REMOTE_BRANCH_EXISTS=$(git ls-remote --heads origin ${CKB_LIGHT_CLIENT_BRANCH} | wc -l)
+if [ "$REMOTE_BRANCH_EXISTS" -gt 0 ]; then
+    # 远程分支存在，先 fetch 该分支，然后切换
+    git fetch origin ${CKB_LIGHT_CLIENT_BRANCH}
     git checkout -B ${CKB_LIGHT_CLIENT_BRANCH} origin/${CKB_LIGHT_CLIENT_BRANCH}
 elif git show-ref --verify --quiet refs/heads/${CKB_LIGHT_CLIENT_BRANCH}; then
+    # 远程分支不存在，但本地分支存在
     git checkout ${CKB_LIGHT_CLIENT_BRANCH}
 else
+    # 分支不存在
     echo "Error: Branch ${CKB_LIGHT_CLIENT_BRANCH} does not exist in remote or local"
+    echo "Available remote branches:"
+    git ls-remote --heads origin | sed 's|.*refs/heads/||' || true
     exit 1
 fi
 cargo install wasm-pack
