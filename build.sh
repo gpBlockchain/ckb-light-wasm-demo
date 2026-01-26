@@ -25,6 +25,7 @@ else
     git ls-remote --heads origin | sed 's|.*refs/heads/||' || true
     exit 1
 fi
+git log -1
 cargo install wasm-pack
 npm install
 npm run build -ws
